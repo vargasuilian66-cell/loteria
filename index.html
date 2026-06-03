@@ -1,72 +1,59 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body { font-family: Arial; text-align: center; }
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, 60px);
-  gap: 5px;
-  justify-content: center;
-}
-.cell {
-  width: 60px;
-  height: 60px;
-  background: #eee;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-weight: bold;
-  border-radius: 10px;
-}
-.marked {
-  background: green;
-  color: white;
-}
-button {
-  margin: 10px;
-  padding: 10px;
-}
-</style>
-</head>
-<body>
-
-<h2>Cartón Lotería Paraguaya</h2>
-
-<button onclick="generar()">Nuevo Cartón</button>
-
-<div class="grid" id="grid"></div>
-
 <script>
-function generar() {
-  const grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
+function generarCarton(seed) {
   let numeros = [];
-  while(numeros.length < 24){
-    let n = Math.floor(Math.random() * 99) + 1;
-    if(!numeros.includes(n)){
+  let usados = {};
+
+  while (numeros.length < 25) {
+    let n = Math.floor((seed * 9301 + 49297) % 233280 / 233280 * 90) + 1;
+    seed++;
+    if (!usados[n]) {
       numeros.push(n);
+      usados[n] = true;
     }
   }
 
-  numeros.splice(12, 0, "FREE");
+  let tabla = document.getElementById("carton");
+  tabla.innerHTML = "";
 
-  numeros.forEach(num => {
-    let div = document.createElement("div");
-    div.className = "cell";
-    div.innerText = num;
-    div.onclick = function() {
-      div.classList.toggle("marked");
-    };
-    grid.appendChild(div);
-  });
+  for (let i = 0; i < 5; i++) {
+    let fila = "<tr>";
+    for (let j = 0; j < 5; j++) {
+      let num = numeros[i * 5 + j];
+      fila += `<td onclick="marcar(this)">${num}</td>`;
+    }
+    fila += "</tr>";
+    tabla.innerHTML += fila;
+  }
 }
 
-generar();
-</script>
+function marcar(celda) {
+  celda.classList.toggle("activo");
+}
 
-</body>
-</html>
+// 👉 GENERAR ID ÚNICO
+function obtenerID() {
+  let url = new URL(window.location.href);
+  let id = url.searchParams.get("id");
+
+  if (!id) {
+    id = Math.random().toString(36).substring(2, 8);
+    window.location.search = "?id=" + id;
+  }
+
+  return id;
+}
+
+// 👉 convertir ID en número (seed)
+function idANumero(id) {
+  let total = 0;
+  for (let i = 0; i < id.length; i++) {
+    total += id.charCodeAt(i);
+  }
+  return total;
+}
+
+// INICIO
+let id = obtenerID();
+let seed = idANumero(id);
+generarCarton(seed);
+</script>
