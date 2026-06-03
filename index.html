@@ -1,11 +1,14 @@
 <script>
-function generarCarton(seed) {
+function generarCarton(numeroCarton) {
   let numeros = [];
   let usados = {};
 
+  let seed = numeroCarton;
+
   while (numeros.length < 25) {
-    let n = Math.floor((seed * 9301 + 49297) % 233280 / 233280 * 90) + 1;
-    seed++;
+    seed = (seed * 9301 + 49297) % 233280;
+    let n = Math.floor(seed / 233280 * 90) + 1;
+
     if (!usados[n]) {
       numeros.push(n);
       usados[n] = true;
@@ -30,30 +33,20 @@ function marcar(celda) {
   celda.classList.toggle("activo");
 }
 
-// 👉 GENERAR ID ÚNICO
-function obtenerID() {
+// 👉 Obtener número desde la URL
+function obtenerCarton() {
   let url = new URL(window.location.href);
-  let id = url.searchParams.get("id");
+  let num = url.searchParams.get("carton");
 
-  if (!id) {
-    id = Math.random().toString(36).substring(2, 8);
-    window.location.search = "?id=" + id;
+  // Si no hay número → poner 1 por defecto
+  if (!num) {
+    num = 1;
   }
 
-  return id;
-}
-
-// 👉 convertir ID en número (seed)
-function idANumero(id) {
-  let total = 0;
-  for (let i = 0; i < id.length; i++) {
-    total += id.charCodeAt(i);
-  }
-  return total;
+  return parseInt(num);
 }
 
 // INICIO
-let id = obtenerID();
-let seed = idANumero(id);
-generarCarton(seed);
+let numero = obtenerCarton();
+generarCarton(numero);
 </script>
